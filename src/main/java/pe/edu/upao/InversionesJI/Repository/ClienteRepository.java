@@ -8,6 +8,6 @@ import pe.edu.upao.InversionesJI.Entity.Usuario;
 import java.util.Optional;
 
 @Repository
-public interface ClienteRepository extends JpaRepository<Cliente, Usuario> {
+public interface ClienteRepository extends JpaRepository<Cliente, Long> {
     Optional<Cliente> findByUsername(String correo);
 }

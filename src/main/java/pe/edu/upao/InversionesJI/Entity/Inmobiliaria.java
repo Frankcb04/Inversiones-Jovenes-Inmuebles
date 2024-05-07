@@ -8,8 +8,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 @Data
 @AllArgsConstructor
@@ -26,7 +25,7 @@ public class Inmobiliaria implements UserDetails {
     String direccion;
     String username;
     String password;
-    int ruc;
+    long ruc;
     int telefonoContacto;
     String role;
 
@@ -55,4 +54,6 @@ public class Inmobiliaria implements UserDetails {
         return true;
     }
 
+    @OneToMany(mappedBy = "inmobiliaria", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Articulo> articulos = new ArrayList<>();
 }

@@ -8,6 +8,6 @@ import pe.edu.upao.InversionesJI.Entity.Usuario;
 import java.util.Optional;
 
 @Repository
-public interface AgenteRepository extends JpaRepository<Agente, Usuario> {
+public interface AgenteRepository extends JpaRepository<Agente, Long> {
     Optional<Agente> findByUsername(String correo);
 }

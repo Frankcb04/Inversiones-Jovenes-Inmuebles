@@ -1,8 +1,10 @@
 package pe.edu.upao.InversionesJI.Service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,7 @@ import pe.edu.upao.InversionesJI.Request.RegisterClienteRequest;
 import pe.edu.upao.InversionesJI.Response.AuthResponse;
 import pe.edu.upao.InversionesJI.Entity.Cliente;
 
+import java.util.Collections;
 import java.util.Optional;
 
 @Service
@@ -25,45 +28,45 @@ public class AuthService {
 
     private final ClienteRepository clienteRepository;
     private final AgenteRepository agenteRepository;
+    private final InmobiliariaRepository inmobiliariaRepository;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
-    private final AuthenticationManager authenticationManager;
-    private final InmobiliariaRepository inmobiliariaRepository;
 
-    public AuthResponse login(LoginRequest request){
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getCorreo(), request.getContrasena()));
+    public AuthResponse login(LoginRequest request) {
+        System.out.println("Intento de inicio de sesión para el usuario: " + request.getCorreo());
+        UserDetails userDetails = loadUserByUsername(request.getCorreo());
 
-        // Buscar el usuario como Cliente
-        Optional<Cliente> clienteOptional = clienteRepository.findByUsername(request.getCorreo());
-        if(clienteOptional.isPresent()) {
+        if (userDetails != null && passwordEncoder.matches(request.getContrasena(), userDetails.getPassword())) {
+            System.out.println("Autenticación exitosa para el usuario: " + request.getCorreo());
+
+            // Generar token y devolver respuesta de autenticación
+            String token = jwtService.getToken(userDetails);
+
+            return new AuthResponse(token);
+        } else {
+            throw new BadCredentialsException("Credenciales incorrectas para el usuario: " + request.getCorreo());
+        }
+    }
+
+    public UserDetails loadUserByUsername(String correo) {
+        Optional<Cliente> clienteOptional = clienteRepository.findByUsername(correo);
+        if (clienteOptional.isPresent()) {
             Cliente cliente = clienteOptional.get();
-            String token = jwtService.getToken(cliente);
-            return AuthResponse.builder()
-                    .token(token)
-                    .build();
+            return new User(cliente.getUsername(), cliente.getPassword(), Collections.singletonList(new SimpleGrantedAuthority("Cliente")));
         }
 
-        // Si no es Cliente, buscar como Agente
-        Optional<Agente> agenteOptional = agenteRepository.findByUsername(request.getCorreo());
-        if(agenteOptional.isPresent()) {
+        Optional<Agente> agenteOptional = agenteRepository.findByUsername(correo);
+        if (agenteOptional.isPresent()) {
             Agente agente = agenteOptional.get();
-            String token = jwtService.getToken(agente);
-            return AuthResponse.builder()
-                    .token(token)
-                    .build();
+            return new User(agente.getUsername(), agente.getPassword(), Collections.singletonList(new SimpleGrantedAuthority("Agente")));
         }
 
-        // Si no es Agente, buscar como Inmobiliaria
-        Optional<Inmobiliaria> inmobiliariaOptional = inmobiliariaRepository.findByUsername(request.getCorreo());
-        if(inmobiliariaOptional.isPresent()) {
+        Optional<Inmobiliaria> inmobiliariaOptional = inmobiliariaRepository.findByUsername(correo);
+        if (inmobiliariaOptional.isPresent()) {
             Inmobiliaria inmobiliaria = inmobiliariaOptional.get();
-            String token = jwtService.getToken(inmobiliaria);
-            return AuthResponse.builder()
-                    .token(token)
-                    .build();
+            return new User(inmobiliaria.getUsername(), inmobiliaria.getPassword(), Collections.singletonList(new SimpleGrantedAuthority("Inmobiliaria")));
         }
-
-        throw new UsernameNotFoundException("Usuario no encontrado con username: " + request.getCorreo());
+        throw new UsernameNotFoundException("Usuario no encontrado con correo: " + correo);
     }
 
     public AuthResponse registerCliente(RegisterClienteRequest request){

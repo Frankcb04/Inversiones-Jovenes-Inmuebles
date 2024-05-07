@@ -28,6 +28,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authRequest ->
                         authRequest
                                 .requestMatchers("/auth/**").permitAll()
+                                .requestMatchers("/inmobiliaria/registrarInmobiliaria").permitAll()
+                                .requestMatchers("/cliente/**").hasAuthority("Cliente")
+                                .requestMatchers("/agente/**").hasAuthority("Agente")
+                                .requestMatchers("/inmobiliaria/**").hasAuthority("Inmobiliaria")
                                 .anyRequest().authenticated()
                 )
                 .sessionManagement(sessionManager ->
