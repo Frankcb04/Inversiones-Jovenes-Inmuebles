@@ -17,6 +17,7 @@ import pe.edu.upao.InversionesJI.Request.RegisterAgenteRequest;
 import pe.edu.upao.InversionesJI.Request.RegisterInmobiliariaRequest;
 import pe.edu.upao.InversionesJI.Response.AuthResponse;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -29,25 +30,7 @@ public class InmobiliariaService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
-    public AuthResponse agregarAgente(RegisterAgenteRequest request) {
-        System.out.println("Solicitud para agregar agentes recibida: " + request);
-        Agente agente = new Agente();
-        agente.setNombre(request.getNombre());
-        agente.setApellido(request.getApellido());
-        agente.setRole("Agente");
-        agente.setUsername(request.getCorreo());
-        agente.setPassword(passwordEncoder.encode(request.getContrasena()));
-        agente.setDni(request.getDni());
-        agente.setTelefono(request.getTelefono());
-        agente.setHorarioAtencion(request.getHorarioAtencion());
-        agenteRepository.save(agente);
-
-        return AuthResponse.builder()
-                .token(jwtService.getToken(agente))
-                .build();
-
-    }
-
+    //Agregar Inmobiliaria
     public AuthResponse agregarInmobiliaria(RegisterInmobiliariaRequest request) {
         System.out.println("Solicitud para agregar inmobiliaria recibida: " + request);
         Inmobiliaria inmobiliaria = new Inmobiliaria();
@@ -63,9 +46,48 @@ public class InmobiliariaService {
         return AuthResponse.builder()
                 .token(jwtService.getToken(inmobiliaria))
                 .build();
-
     }
 
+    //Agregar a un agente
+    public AuthResponse agregarAgente(RegisterAgenteRequest request) {
+        System.out.println("Solicitud para agregar agentes recibida: " + request);
+        Agente agente = new Agente();
+        agente.setNombre(request.getNombre());
+        agente.setApellido(request.getApellido());
+        agente.setRole("Agente");
+        agente.setUsername(request.getCorreo());
+        agente.setPassword(passwordEncoder.encode(request.getContrasena()));
+        agente.setDni(request.getDni());
+        agente.setTelefono(request.getTelefono());
+        agente.setNombreInmobiliaria(request.getNombreInmobiliaria());
+        agenteRepository.save(agente);
+
+        return AuthResponse.builder()
+                .token(jwtService.getToken(agente))
+                .build();
+    }
+
+    //Modificar datos del agente
+    public Agente modificarAgente(Long id, RegisterAgenteRequest request) {
+        Agente agente = agenteRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Agente no encontrado con el ID: " + id));
+
+        agente.setNombre(request.getNombre());
+        agente.setApellido(request.getApellido());
+        agente.setUsername(request.getCorreo());
+        agente.setDni(request.getDni());
+        agente.setTelefono(request.getTelefono());
+        agente.setNombreInmobiliaria(request.getNombreInmobiliaria());
+
+        if (request.getContrasena() != null && !request.getContrasena().isEmpty()) {
+            agente.setPassword(passwordEncoder.encode(request.getContrasena()));
+        }
+
+        agenteRepository.save(agente);
+        return agente;
+    }
+
+    //Eliminar al agente
     public ResponseEntity<?> eliminarAgente(Long id) {
         Optional<Agente> agenteOptional = agenteRepository.findById(id);
         if (agenteOptional.isPresent()) {
@@ -77,6 +99,12 @@ public class InmobiliariaService {
         }
     }
 
+    //Listar a todos los agentes
+    public List<Agente> listarAgentes() {
+        return agenteRepository.findAll();
+    }
+
+    //Agregar artículo
     public Articulo agregarArticulo(Long idInmobiliaria, ArticuloDto articuloDto) {
         Inmobiliaria inmobiliaria = findById(idInmobiliaria);
         if (inmobiliaria == null) {

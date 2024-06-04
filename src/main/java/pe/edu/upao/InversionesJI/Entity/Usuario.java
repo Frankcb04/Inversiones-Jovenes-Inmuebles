@@ -20,14 +20,14 @@ import java.util.List;
 public class Usuario implements UserDetails {
     @Id
     @GeneratedValue
-    Long id;
-    String nombre;
-    String apellido;
-    String password;
-    String username;
-    int telefono;
-    int dni;
-    String role;
+    private Long id;
+    private String nombre;
+    private String apellido;
+    private String password;
+    private String username;
+    private int telefono;
+    private int dni;
+    private String role;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

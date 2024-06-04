@@ -16,7 +16,7 @@ public class RegisterAgenteRequest {
     String apellido;
     String correo;
     String contrasena;
+    String nombreInmobiliaria;
     int telefono;
     int dni;
-    Date horarioAtencion;
 }

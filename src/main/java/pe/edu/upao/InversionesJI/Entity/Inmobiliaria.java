@@ -20,14 +20,14 @@ public class Inmobiliaria implements UserDetails {
 
     @Id
     @GeneratedValue
-    Long idInmobiliaria;
-    String nombreInmobiliaria;
-    String direccion;
-    String username;
-    String password;
-    long ruc;
-    int telefonoContacto;
-    String role;
+    private Long idInmobiliaria;
+    private String nombreInmobiliaria;
+    private String direccion;
+    private String username;
+    private String password;
+    private long ruc;
+    private int telefonoContacto;
+    private String role;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

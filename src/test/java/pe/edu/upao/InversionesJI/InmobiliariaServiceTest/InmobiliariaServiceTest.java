@@ -49,7 +49,7 @@ public class InmobiliariaServiceTest {
         request.setContrasena("012345");
         request.setTelefono(929102837);
         request.setDni(73940195);
-        request.setHorarioAtencion(new Date(2022-10-12));
+        request.setNombreInmobiliaria("Grupo CAPEX");
 
         when(passwordEncoder.encode(anyString())).thenReturn("contraseñaEncriptada");
         when(jwtService.getToken(any())).thenReturn("token");
